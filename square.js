@@ -3,6 +3,6 @@ class Square {
         this.isGrayedOut = false;
         this.hasWeapon = false;
         this.hasPlayer = false;
-        this.isAttaianble = false;
+        this.numberWallsAround = 0;
     }
 }
