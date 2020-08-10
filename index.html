@@ -8,12 +8,16 @@
 <body>
     <form id="formWalls" method="post" action="">
         <label for="walls">Choisissez le nombre de murs (de 8 à 14) : </label>
-        <input type="number" name="walls" id="walls" min="8" max="14" />
+        <input type="number" name="walls" id="walls" min="8" max="14" /><br />
+        <label for="weapons">Choisissez le nombre d'armes (de 1 à 4) : </label>
+        <input type="number" name="weapons" id="weapons" min="1" max="4" />
         <button type="submit">Générer</button>
     </form>
 
     <div id="board"></div>
     <script src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="weapon.js"></script>
+    <script src="player.js"></script>
     <script src="square.js"></script>
     <script src="board.js"></script>
 </body>
