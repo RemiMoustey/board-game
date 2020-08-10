@@ -2,12 +2,12 @@ class Board {
     constructor(numberLines, numberColumns) {
         this.squares = this.createSquares(numberLines, numberColumns);
         this.weapons = [
-            new Weapon("pistol", "img/pistol.png", 10),
-            new Weapon("shotgun", "img/shotgun.png", 20),
-            new Weapon("rocket_launcher", "img/rocket_launcher.png", 50),
-            new Weapon("pump-action_shotgun", "img/pump-action_shotgun.png", 35)
+            new Weapon("pistol", "pistol.png", 10),
+            new Weapon("shotgun", "shotgun.png", 20),
+            new Weapon("rocket_launcher", "rocket_launcher.png", 50),
+            new Weapon("pump-action_shotgun", "pump-action_shotgun.png", 35)
         ];
-        this.players = [new Player("img/playerA.png"), new Player("img/playerB.png")];
+        this.players = [new Player("player1.png"), new Player("player2.png")];
         $("#formWalls").submit(this.generateInitialBoard);
     }
 
@@ -33,7 +33,55 @@ class Board {
         this.insertWalls(numberWalls);
         this.summonWeapons($("#weapons").val());
         this.summonPlayers();
+        this.printBoard();
+    }
+
+    printBoard = () => {
         document.querySelector("#formWalls").innerHTML = "";
+        for(let raw of this.squares) {
+            let images = [];
+            for(let square of raw) {
+                let image;
+                if(square.hasPlayer) {
+                    image = square.player.image;
+                } else if(square.hasWeapon) {
+                    image = square.weapon.image;
+                } else if(square.isGrayedOut) {
+                    image = "wall.png";
+                } else {
+                    image = "empty_square.png";
+                }
+                images.push(image);
+            }
+            this.printRow(images);
+        }
+    }
+
+    getHtmlImage = (name) => {
+        let htmlImage = $(document.createElement("img"));
+        htmlImage.attr("src", name);
+        htmlImage.attr("alt", "Une case");
+        return htmlImage;
+    }
+
+    getHtmlSource = (media, image) => {
+        let htmlSource = $(document.createElement("source"));
+        htmlSource.attr("media", media);
+        htmlSource.attr("srcset", image);
+        return htmlSource;
+    }
+
+    printRow = (images) => {
+        let row = $(document.createElement("div"));
+        for(let image of images) {
+            let picture = $(document.createElement("picture"));
+            let htmlImageLarge = this.getHtmlImage("img/" + image);
+            let sourceMedium = this.getHtmlSource("(max-width: 991px)", "img/medium-" + image);
+            let sourceMini = this.getHtmlSource("(max-width: 575px)", "img/mini-" + image);
+            picture.append(sourceMini, sourceMedium, htmlImageLarge);
+            row.append(picture);
+        }
+        $("#board").append(row);
     }
 
     insertWalls = (numberWalls) => {
@@ -90,18 +138,22 @@ class Board {
     }
 
     summonWeapons = (numberWeapons) => {
-        let squaresWithWeapon = [];
+        if(!isNaN(numberWeapons) && numberWeapons >= 1 && numberWeapons <= 4) {
+            let squaresWithWeapon = [];
 
-        for(let i = 0; i < numberWeapons; i++) {
-            let randomSquare = this.getRandomSquare();
-            while(randomSquare.isGrayedOut || randomSquare.hasWeapon) {
-                randomSquare = this.getRandomSquare();
+            for(let i = 0; i < numberWeapons; i++) {
+                let randomSquare = this.getRandomSquare();
+                while(randomSquare.isGrayedOut || randomSquare.hasWeapon) {
+                    randomSquare = this.getRandomSquare();
+                }
+                randomSquare.hasWeapon = true;
+                squaresWithWeapon.push(randomSquare);
             }
-            randomSquare.hasWeapon = true;
-            squaresWithWeapon.push(randomSquare);
-        }
-        for(let square of squaresWithWeapon) {
-            square.weapon = this.weapons[this.getRandomNumber(0, this.weapons.length - 1)];
+            for(let square of squaresWithWeapon) {
+                square.weapon = this.weapons[this.getRandomNumber(0, this.weapons.length - 1)];
+            }
+        } else {
+            document.getElementById("board").textContent = "Erreur : données envoyées incorrectes.";
         }
     }
 

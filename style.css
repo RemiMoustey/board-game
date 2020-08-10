@@ -1,0 +1,16 @@
+#board {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+@media all and (max-width: 991px) {
+    #board {
+        max-width: 550px;
+    }
+}
+
+@media all and (max-width: 575px) {
+    #board {
+        max-width: 300px;
+    }
+}
