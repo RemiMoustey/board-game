@@ -32,35 +32,46 @@ class Board {
         let numberWalls = $("#walls").val();
         this.insertWalls(numberWalls);
         this.summonWeapons($("#weapons").val());
-        this.summonPlayers();
-        this.printBoard();
+    }
+
+    determineImage = (square) => {
+        let image;
+        if(square.hasPlayer) {
+            image = square.player.image;
+        } else if(square.hasWeapon) {
+            image = square.weapon.image;
+        } else if(square.grayedOut) {
+            image = "wall.png";
+        } else {
+            image = "empty_square.png";
+        }
+        return image;
     }
 
     printBoard = () => {
         document.querySelector("#formWalls").innerHTML = "";
+        let squarePlayerOne, squarePlayerTwo;
         for(let raw of this.squares) {
             let images = [];
             for(let square of raw) {
-                let image;
-                if(square.hasPlayer) {
-                    image = square.player.image;
-                } else if(square.hasWeapon) {
-                    image = square.weapon.image;
-                } else if(square.isGrayedOut) {
-                    image = "wall.png";
-                } else {
-                    image = "empty_square.png";
+                let image = this.determineImage(square);
+                if(image === "player1.png" || image === "medium-player1.png" || image === "mini-player1.png") {
+                    squarePlayerOne = square;
+                } else if(image === "player2.png" || image === "medium-player2.png" || image === "mini-player2.png") {
+                    squarePlayerTwo = square;
                 }
                 images.push(image);
             }
             this.printRow(images);
         }
+        this.doARound(squarePlayerOne, squarePlayerTwo);
     }
 
     getHtmlImage = (name) => {
         let htmlImage = $(document.createElement("img"));
         htmlImage.attr("src", name);
         htmlImage.attr("alt", "Une case");
+        htmlImage.addClass("square");
         return htmlImage;
     }
 
@@ -96,23 +107,23 @@ class Board {
     }
 
     grayOverOneSquare = (line, column) => {
-        if(this.squares[line][column].isGrayedOut) {
+        if(this.squares[line][column].grayedOut) {
             this.grayOverOneSquare(this.getRandomRaw(), this.getRandomRaw());
         } else {
-            this.squares[line][column].isGrayedOut = true;
+            this.squares[line][column].grayedOut = true;
         }
     }
 
     verifyAllBoardIsAccessible = () => {
         let randomSquare = this.getRandomSquare();
-        while(randomSquare.isGrayedOut) {
+        while(randomSquare.grayedOut) {
             randomSquare = this.getRandomSquare();
         }
         let travelledSquares = [randomSquare];
         travelledSquares = this.goAround(randomSquare.coordinates.x, randomSquare.coordinates.y, travelledSquares);
         let numberWalls = 0;
         for(let line of this.squares) {
-            numberWalls += line.filter(square => square.isGrayedOut).length;
+            numberWalls += line.filter(square => square.grayedOut).length;
         }
         if(numberWalls !== this.squares.length * this.squares[0].length - travelledSquares.length) {
             this.squares = this.createSquares(10, 10);
@@ -121,7 +132,7 @@ class Board {
     }
 
     getTravelledSquaresInMove = (condition, i, j, travelledSquares) => {
-        if(condition && !this.squares[i][j].isGrayedOut &&
+        if(condition && !this.squares[i][j].grayedOut &&
             !travelledSquares.some(square => square.coordinates.x === i && square.coordinates.y === j)) {
             travelledSquares.push(this.squares[i][j]);
             this.goAround(i, j, travelledSquares);
@@ -143,7 +154,7 @@ class Board {
 
             for(let i = 0; i < numberWeapons; i++) {
                 let randomSquare = this.getRandomSquare();
-                while(randomSquare.isGrayedOut || randomSquare.hasWeapon) {
+                while(randomSquare.grayedOut || randomSquare.hasWeapon) {
                     randomSquare = this.getRandomSquare();
                 }
                 randomSquare.hasWeapon = true;
@@ -152,27 +163,28 @@ class Board {
             for(let square of squaresWithWeapon) {
                 square.weapon = this.weapons[this.getRandomNumber(0, this.weapons.length - 1)];
             }
+            this.summonPlayers();
         } else {
             document.getElementById("board").textContent = "Erreur : données envoyées incorrectes.";
         }
     }
 
-    arePlayersSideBySide = (squarePlayerOne, squarePlayerTwo) => 
-    squarePlayerOne.x - 1 === squarePlayerTwo.x && squarePlayerOne.y - 1 === squarePlayerTwo.y ||
-    squarePlayerOne.x - 1 === squarePlayerTwo.x && squarePlayerOne.y === squarePlayerTwo.y ||
-    squarePlayerOne.x + 1 === squarePlayerTwo.x && squarePlayerOne.y + 1 === squarePlayerTwo.y ||
-    squarePlayerOne.x === squarePlayerTwo.x && squarePlayerOne.y + 1 === squarePlayerTwo.y ||
-    squarePlayerOne.x + 1 === squarePlayerTwo.x && squarePlayerOne.y + 1 === squarePlayerTwo.y ||
-    squarePlayerOne.x + 1 === squarePlayerTwo.x && squarePlayerOne.y === squarePlayerTwo.y ||
-    squarePlayerOne.x + 1 === squarePlayerTwo.x && squarePlayerOne.y - 1 === squarePlayerTwo.y ||
-    squarePlayerOne.x === squarePlayerTwo.x && squarePlayerOne.y - 1 === squarePlayerTwo.y;
+    arePlayersSideBySide = (coordinatesPlayerOne, coordinatesPlayerTwo) => 
+    coordinatesPlayerOne.x - 1 === coordinatesPlayerTwo.x && coordinatesPlayerOne.y - 1 === coordinatesPlayerTwo.y ||
+    coordinatesPlayerOne.x - 1 === coordinatesPlayerTwo.x && coordinatesPlayerOne.y === coordinatesPlayerTwo.y ||
+    coordinatesPlayerOne.x - 1 === coordinatesPlayerTwo.x && coordinatesPlayerOne.y + 1 === coordinatesPlayerTwo.y ||
+    coordinatesPlayerOne.x === coordinatesPlayerTwo.x && coordinatesPlayerOne.y + 1 === coordinatesPlayerTwo.y ||
+    coordinatesPlayerOne.x + 1 === coordinatesPlayerTwo.x && coordinatesPlayerOne.y + 1 === coordinatesPlayerTwo.y ||
+    coordinatesPlayerOne.x + 1 === coordinatesPlayerTwo.x && coordinatesPlayerOne.y === coordinatesPlayerTwo.y ||
+    coordinatesPlayerOne.x + 1 === coordinatesPlayerTwo.x && coordinatesPlayerOne.y - 1 === coordinatesPlayerTwo.y ||
+    coordinatesPlayerOne.x === coordinatesPlayerTwo.x && coordinatesPlayerOne.y - 1 === coordinatesPlayerTwo.y;
 
     summonPlayers = () => {
         let squaresWithPlayerAtTheBeginning = [];
         for(let i = 0; i < 2; i++) {
             let randomSquare = this.getRandomSquare();
-            while(randomSquare.isGrayedOut || randomSquare.hasWeapon || randomSquare.hasPlayer ||
-            i === 1 && this.arePlayersSideBySide(squaresWithPlayerAtTheBeginning[0], randomSquare)) {
+            while(randomSquare.grayedOut || randomSquare.hasWeapon || randomSquare.hasPlayer ||
+            i === 1 && this.arePlayersSideBySide(squaresWithPlayerAtTheBeginning[0].coordinates, randomSquare.coordinates)) {
                 randomSquare = this.getRandomSquare();
             }
             randomSquare.hasPlayer = true;
@@ -181,6 +193,74 @@ class Board {
         for(let i = 0; i < 2; i++) {
             squaresWithPlayerAtTheBeginning[i].player = this.players[i];
         }
+        this.printBoard();
+    }
+
+    isWallInRaw = (square, side, i) => side === "top" && square.coordinates.x - i > -1 &&
+    this.squares[square.coordinates.x - i][square.coordinates.y].grayedOut ||
+    side === "right" && square.coordinates.y + i < this.squares.length &&
+    this.squares[square.coordinates.x][square.coordinates.y + i].grayedOut ||
+    side === "bottom" && square.coordinates.x + i < this.squares.length &&
+    this.squares[square.coordinates.x + i][square.coordinates.y].grayedOut ||
+    side === "left" && square.coordinates.y - i > -1 &&
+    this.squares[square.coordinates.x][square.coordinates.y - i].grayedOut;
+
+    isPlayerInRaw = (square, side, i) => side === "top" && square.coordinates.x - i > -1 &&
+    this.squares[square.coordinates.x - i][square.coordinates.y].hasPlayer ||
+    side === "right" && square.coordinates.y + i < this.squares.length &&
+    this.squares[square.coordinates.x][square.coordinates.y + i].hasPlayer ||
+    side === "bottom" && square.coordinates.x + i < this.squares.length &&
+    this.squares[square.coordinates.x + i][square.coordinates.y].hasPlayer ||
+    side === "left" && square.coordinates.y - i > -1 &&
+    this.squares[square.coordinates.x][square.coordinates.y - i].hasPlayer;
+
+    markARowReachable = (square, side) => {
+        for(let i = 1; i < 4; i++) {
+            if(this.isWallInRaw(square, side, i) || this.isPlayerInRaw(square, side, i)) {
+                break;
+            }
+            if(side === "top" && square.coordinates.x - i > -1) {
+                this.squares[square.coordinates.x - i][square.coordinates.y].reachable = true;
+            } else if(side === "right" && square.coordinates.y + i < this.squares.length) {
+                this.squares[square.coordinates.x][square.coordinates.y + i].reachable = true;
+            } else if(side === "bottom" && square.coordinates.x + i < this.squares.length) {
+                this.squares[square.coordinates.x + i][square.coordinates.y].reachable = true;
+            } else if(side === "left" && square.coordinates.y - i > - 1) {
+                this.squares[square.coordinates.x][square.coordinates.y - i].reachable = true;
+            }
+        }
+    }
+
+    markSquaresReachableByPlayer = (square) => {
+        this.markARowReachable(square, "top");
+        this.markARowReachable(square, "right");
+        this.markARowReachable(square, "bottom");
+        this.markARowReachable(square, "left");
+    }
+
+    getReachableSquares = () => {
+        let reachableSquares = [];
+        for(let i = 0; i < this.squares.length; i++) {
+            for(let j = 0; j < this.squares[i].length; j++) {
+                if(this.squares[i][j].reachable) {
+                    reachableSquares.push(this.squares[i][j]);
+                }
+            }
+        }
+        return reachableSquares;
+    }
+
+    doARound = (squarePlayerWillPlay, squarePlayerWontPlay) => {
+        this.markSquaresReachableByPlayer(squarePlayerWillPlay);
+        let reachableSquares = this.getReachableSquares();
+        for(let reachableSquare of reachableSquares) {
+            let lineDiv = "#board div:nth-child(" + (reachableSquare.coordinates.x + 1) + ")";
+            $(lineDiv + " picture:nth-child(" + (reachableSquare.coordinates.y + 1) + ") img").addClass("reachable");
+        }
+    }
+
+    updateBoardBegginningRound = () => {
+
     }
 }
 
