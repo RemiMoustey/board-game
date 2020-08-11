@@ -292,21 +292,46 @@ class Board {
         }
     }
 
+    checkWeapons = (square, player) => {
+        if(square.hasWeapon) {
+            let lastPlayerWeapon = player.weapon;
+            player.weapon = square.weapon;
+            lastPlayerWeapon.image = lastPlayerWeapon.image;
+            square.weapon = lastPlayerWeapon;
+        }
+    }
+
+    updateWeapon = (square, htmlSquare) => {
+        if(square.hasWeapon) {
+            htmlSquare.attr("src", "img/" + square.weapon.image);
+            $(htmlSquare.siblings()[0]).attr("srcset", "img/mini-" + square.weapon.image);
+            $(htmlSquare.siblings()[1]).attr("srcset", "img/medium-" + square.weapon.image);
+        }
+    }
+
+    changeId = (event) => {
+        $("#" + this.currentPlayer.name).removeAttr("id");
+        $(event.target).attr("id", this.currentPlayer.name);
+    }
+
     movePlayer = (e) => {
         if(!$(e.target).hasClass("reachable")) {
             return;
         }
-        this.squares[$("#" + this.currentPlayer.name).parent().parent().index()]
-        [$("#" + this.currentPlayer.name).parent().index()].hasPlayer = false;
+        let initialSquare = this.squares[$("#" + this.currentPlayer.name).parent().parent().index()]
+        [$("#" + this.currentPlayer.name).parent().index()];
+        initialSquare.hasPlayer = false;
         $(e.target).attr("src", $("#" + this.currentPlayer.name).attr("src"));
         this.replaceSiblings($(e.target), "srcset", $("#" + this.currentPlayer.name).siblings());
         $("#" + this.currentPlayer.name).attr("src", $($(".empty")[0]).attr("src"));
         this.replaceSiblings($("#" + this.currentPlayer.name), "srcset", $($(".empty")[0]).siblings());
-        $("#" + this.currentPlayer.name).removeAttr("id");
-        $(e.target).attr("id", this.currentPlayer.name);
+        this.updateWeapon(initialSquare, $("#" + this.currentPlayer.name));
+        this.changeId(e);
         this.changeReachableSquares();
-        this.squares[$("#" + this.currentPlayer.name).parent().parent().index()]
-        [$("#" + this.currentPlayer.name).parent().index()].hasPlayer = true;
+        let finalSquare = this.squares[$("#" + this.currentPlayer.name).parent().parent().index()]
+        [$("#" + this.currentPlayer.name).parent().index()];
+        finalSquare.hasPlayer = true;
+        this.checkWeapons(finalSquare, this.currentPlayer);
         this.changePlayer();
         this.doARound(this.squares[$("#" + this.currentPlayer.name).parent().parent().index()]
         [$("#" + this.currentPlayer.name).parent().index()]);
