@@ -7,7 +7,9 @@ class Board {
             new Weapon("rocket_launcher", "rocket_launcher.png", 50),
             new Weapon("pump-action_shotgun", "pump-action_shotgun.png", 35)
         ];
-        this.players = [new Player("player1.png"), new Player("player2.png")];
+        this.players = [new Player("player1"), new Player("player2")];
+        this.currentPlayer = this.players[0];
+        this.currentReachableSquares = null;
         $("#formWalls").submit(this.generateInitialBoard);
     }
 
@@ -50,21 +52,19 @@ class Board {
 
     printBoard = () => {
         document.querySelector("#formWalls").innerHTML = "";
-        let squarePlayerOne, squarePlayerTwo;
+        let squarePlayerOne;
         for(let raw of this.squares) {
             let images = [];
             for(let square of raw) {
                 let image = this.determineImage(square);
                 if(image === "player1.png" || image === "medium-player1.png" || image === "mini-player1.png") {
                     squarePlayerOne = square;
-                } else if(image === "player2.png" || image === "medium-player2.png" || image === "mini-player2.png") {
-                    squarePlayerTwo = square;
                 }
                 images.push(image);
             }
             this.printRow(images);
         }
-        this.doARound(squarePlayerOne, squarePlayerTwo);
+        this.doARound(squarePlayerOne);
     }
 
     getHtmlImage = (name) => {
@@ -86,10 +86,17 @@ class Board {
         let row = $(document.createElement("div"));
         for(let image of images) {
             let picture = $(document.createElement("picture"));
-            let htmlImageLarge = this.getHtmlImage("img/" + image);
+            let htmlLargeImage = this.getHtmlImage("img/" + image);
+            if(image === "player1.png") {
+                htmlLargeImage.attr("id", "player1");
+            } else if(image === "player2.png") {
+                htmlLargeImage.attr("id", "player2");
+            } else if(image === "empty_square.png") {
+                htmlLargeImage.addClass("empty");
+            }
             let sourceMedium = this.getHtmlSource("(max-width: 991px)", "img/medium-" + image);
             let sourceMini = this.getHtmlSource("(max-width: 575px)", "img/mini-" + image);
-            picture.append(sourceMini, sourceMedium, htmlImageLarge);
+            picture.append(sourceMini, sourceMedium, htmlLargeImage);
             row.append(picture);
         }
         $("#board").append(row);
@@ -250,17 +257,59 @@ class Board {
         return reachableSquares;
     }
 
-    doARound = (squarePlayerWillPlay, squarePlayerWontPlay) => {
+    doARound = (squarePlayerWillPlay) => {
         this.markSquaresReachableByPlayer(squarePlayerWillPlay);
         let reachableSquares = this.getReachableSquares();
         for(let reachableSquare of reachableSquares) {
             let lineDiv = "#board div:nth-child(" + (reachableSquare.coordinates.x + 1) + ")";
             $(lineDiv + " picture:nth-child(" + (reachableSquare.coordinates.y + 1) + ") img").addClass("reachable");
         }
+        this.currentReachableSquares = $(".reachable");
+        this.currentReachableSquares.click(this.movePlayer);
     }
 
-    updateBoardBegginningRound = () => {
+    replaceSiblings = (element, attribute, value) => {
+        for(let i = 0; i < $(element).siblings().length; i++) {
+            $(element.siblings()[i]).attr(attribute, $(value[i]).attr(attribute));
+        }
+    }
 
+    changePlayer = () => {
+        if(this.currentPlayer.name === "player2") {
+            this.currentPlayer = this.players[0];
+        } else if(this.currentPlayer.name === "player1") {
+            this.currentPlayer = this.players[1];
+        }
+    }
+
+    changeReachableSquares = () => {
+        for(let reachableSquare of this.getReachableSquares()) {
+            reachableSquare.reachable = false;
+        }
+        let reachableSquares = $(".reachable");
+        for(let i = 0; i < reachableSquares.length; i++) {
+            $(reachableSquares[i]).removeClass("reachable");
+        }
+    }
+
+    movePlayer = (e) => {
+        if(!$(e.target).hasClass("reachable")) {
+            return;
+        }
+        this.squares[$("#" + this.currentPlayer.name).parent().parent().index()]
+        [$("#" + this.currentPlayer.name).parent().index()].hasPlayer = false;
+        $(e.target).attr("src", $("#" + this.currentPlayer.name).attr("src"));
+        this.replaceSiblings($(e.target), "srcset", $("#" + this.currentPlayer.name).siblings());
+        $("#" + this.currentPlayer.name).attr("src", $($(".empty")[0]).attr("src"));
+        this.replaceSiblings($("#" + this.currentPlayer.name), "srcset", $($(".empty")[0]).siblings());
+        $("#" + this.currentPlayer.name).removeAttr("id");
+        $(e.target).attr("id", this.currentPlayer.name);
+        this.changeReachableSquares();
+        this.squares[$("#" + this.currentPlayer.name).parent().parent().index()]
+        [$("#" + this.currentPlayer.name).parent().index()].hasPlayer = true;
+        this.changePlayer();
+        this.doARound(this.squares[$("#" + this.currentPlayer.name).parent().parent().index()]
+        [$("#" + this.currentPlayer.name).parent().index()]);
     }
 }
 

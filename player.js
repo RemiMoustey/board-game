@@ -1,7 +1,8 @@
 class Player {
-    constructor(image) {
+    constructor(name) {
+        this.name = name;
         this.lifePoints = 100;
         this.weapon = new Weapon("pistol", "img/pistol.png", 10);
-        this.image = image;
+        this.image = name + ".png";
     }
 }

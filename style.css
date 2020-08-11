@@ -9,6 +9,15 @@
 
 .square {
     border: 1px solid #dcdcdc;
+    position: relative;
+    z-index: 0;
+}
+
+.square.reachable {
+    border: 1px solid #000;
+    box-shadow: 2px 2px 3px #000, -2px -2px 3px #000;
+    z-index: 1;
+    cursor: pointer;
 }
 
 @media all and (max-width: 991px) {
