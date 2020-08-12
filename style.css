@@ -20,6 +20,14 @@
     cursor: pointer;
 }
 
+#buttons-battle, #players {
+    display: none;
+}
+
+#buttons-battle button {
+    cursor: pointer;
+}
+
 @media all and (max-width: 991px) {
     #board {
         max-width: 520px;

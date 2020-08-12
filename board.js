@@ -2,10 +2,10 @@ class Board {
     constructor(numberLines, numberColumns) {
         this.squares = this.createSquares(numberLines, numberColumns);
         this.weapons = [
-            new Weapon("pistol", "pistol.png", 10),
-            new Weapon("shotgun", "shotgun.png", 20),
-            new Weapon("rocket_launcher", "rocket_launcher.png", 50),
-            new Weapon("pump-action_shotgun", "pump-action_shotgun.png", 35)
+            new Weapon("Pistol", "pistol.png", 10),
+            new Weapon("Shotgun", "shotgun.png", 20),
+            new Weapon("Rocket launcher", "rocket_launcher.png", 50),
+            new Weapon("Pump-action shotgun", "pump-action_shotgun.png", 35)
         ];
         this.players = [new Player("player1"), new Player("player2")];
         this.currentPlayer = this.players[0];
@@ -257,6 +257,12 @@ class Board {
         return reachableSquares;
     }
 
+    arePlayersAdjacent = (squareOnePlayer) =>
+    squareOnePlayer.coordinates.x > 0 && this.squares[squareOnePlayer.coordinates.x - 1][squareOnePlayer.coordinates.y].hasPlayer ||
+    squareOnePlayer.coordinates.y < this.squares.length - 1 && this.squares[squareOnePlayer.coordinates.x][squareOnePlayer.coordinates.y + 1].hasPlayer ||
+    squareOnePlayer.coordinates.x < this.squares.length - 1 && this.squares[squareOnePlayer.coordinates.x + 1][squareOnePlayer.coordinates.y].hasPlayer ||
+    squareOnePlayer.coordinates.y > 0 && this.squares[squareOnePlayer.coordinates.x][squareOnePlayer.coordinates.y - 1].hasPlayer;
+
     doARound = (squarePlayerWillPlay) => {
         this.markSquaresReachableByPlayer(squarePlayerWillPlay);
         let reachableSquares = this.getReachableSquares();
@@ -314,6 +320,12 @@ class Board {
         $(event.target).attr("id", this.currentPlayer.name);
     }
 
+    engageBattle = (attacker) => {
+        alert("Figth to the death engaged!");
+        this.changePlayer();
+        new Battle(attacker, this.currentPlayer, this.players[0], this.players[1]);
+    }
+
     movePlayer = (e) => {
         if(!$(e.target).hasClass("reachable")) {
             return;
@@ -332,6 +344,10 @@ class Board {
         [$("#" + this.currentPlayer.name).parent().index()];
         finalSquare.hasPlayer = true;
         this.checkWeapons(finalSquare, this.currentPlayer);
+        if(this.arePlayersAdjacent(finalSquare)) {
+            this.engageBattle(this.currentPlayer);
+            return;
+        }
         this.changePlayer();
         this.doARound(this.squares[$("#" + this.currentPlayer.name).parent().parent().index()]
         [$("#" + this.currentPlayer.name).parent().index()]);
