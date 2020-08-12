@@ -10,7 +10,7 @@ class Board {
         this.players = [new Player("player1"), new Player("player2")];
         this.currentPlayer = this.players[0];
         this.currentReachableSquares = null;
-        $("#formWalls").submit(this.generateInitialBoard);
+        $("#formParameters").submit(this.generateInitialBoard);
     }
 
     createSquares = (numberLines, numberColumns) => {
@@ -31,9 +31,15 @@ class Board {
 
     generateInitialBoard = (e) => {
         e.preventDefault();
-        let numberWalls = $("#walls").val();
-        this.insertWalls(numberWalls);
-        this.summonWeapons($("#weapons").val());
+        if(!isNaN($("#walls").val()) && $("#walls").val() >= 8 && $("#walls").val() <= 14 &&
+        !isNaN($("#weapons").val()) && $("#weapons").val() >= 1 && $("#weapons").val() <= 4) {
+            let numberWalls = $("#walls").val();
+            this.insertWalls(numberWalls);
+            this.summonWeapons($("#weapons").val());
+        } else {
+            $("#formParameters").html("");
+            $("#board").text("Erreur : données envoyées incorrectes.");
+        }
     }
 
     determineImage = (square) => {
@@ -51,7 +57,7 @@ class Board {
     }
 
     printBoard = () => {
-        document.querySelector("#formWalls").innerHTML = "";
+        $("#formParameters").html("");
         let squarePlayerOne;
         for(let raw of this.squares) {
             let images = [];
@@ -103,14 +109,10 @@ class Board {
     }
 
     insertWalls = (numberWalls) => {
-        if(!isNaN(numberWalls) && numberWalls >= 8 && numberWalls <= 14) {
-            for(let i = 0; i < numberWalls; i++) {
-                this.grayOverOneSquare(this.getRandomRaw(), this.getRandomRaw());
-            }
-            this.verifyAllBoardIsAccessible();
-        } else {
-            document.getElementById("board").textContent = "Erreur : données envoyées incorrectes.";
+        for(let i = 0; i < numberWalls; i++) {
+            this.grayOverOneSquare(this.getRandomRaw(), this.getRandomRaw());
         }
+        this.verifyAllBoardIsAccessible();
     }
 
     grayOverOneSquare = (line, column) => {
@@ -156,24 +158,20 @@ class Board {
     }
 
     summonWeapons = (numberWeapons) => {
-        if(!isNaN(numberWeapons) && numberWeapons >= 1 && numberWeapons <= 4) {
-            let squaresWithWeapon = [];
+        let squaresWithWeapon = [];
 
-            for(let i = 0; i < numberWeapons; i++) {
-                let randomSquare = this.getRandomSquare();
-                while(randomSquare.grayedOut || randomSquare.hasWeapon) {
-                    randomSquare = this.getRandomSquare();
-                }
-                randomSquare.hasWeapon = true;
-                squaresWithWeapon.push(randomSquare);
+        for(let i = 0; i < numberWeapons; i++) {
+            let randomSquare = this.getRandomSquare();
+            while(randomSquare.grayedOut || randomSquare.hasWeapon) {
+                randomSquare = this.getRandomSquare();
             }
-            for(let square of squaresWithWeapon) {
-                square.weapon = this.weapons[this.getRandomNumber(0, this.weapons.length - 1)];
-            }
-            this.summonPlayers();
-        } else {
-            document.getElementById("board").textContent = "Erreur : données envoyées incorrectes.";
+            randomSquare.hasWeapon = true;
+            squaresWithWeapon.push(randomSquare);
         }
+        for(let square of squaresWithWeapon) {
+            square.weapon = this.weapons[this.getRandomNumber(0, this.weapons.length - 1)];
+        }
+        this.summonPlayers();
     }
 
     arePlayersSideBySide = (coordinatesPlayerOne, coordinatesPlayerTwo) => 
@@ -258,10 +256,14 @@ class Board {
     }
 
     arePlayersAdjacent = (squareOnePlayer) =>
-    squareOnePlayer.coordinates.x > 0 && this.squares[squareOnePlayer.coordinates.x - 1][squareOnePlayer.coordinates.y].hasPlayer ||
-    squareOnePlayer.coordinates.y < this.squares.length - 1 && this.squares[squareOnePlayer.coordinates.x][squareOnePlayer.coordinates.y + 1].hasPlayer ||
-    squareOnePlayer.coordinates.x < this.squares.length - 1 && this.squares[squareOnePlayer.coordinates.x + 1][squareOnePlayer.coordinates.y].hasPlayer ||
-    squareOnePlayer.coordinates.y > 0 && this.squares[squareOnePlayer.coordinates.x][squareOnePlayer.coordinates.y - 1].hasPlayer;
+    squareOnePlayer.coordinates.x > 0 &&
+    this.squares[squareOnePlayer.coordinates.x - 1][squareOnePlayer.coordinates.y].hasPlayer ||
+    squareOnePlayer.coordinates.y < this.squares.length - 1 &&
+    this.squares[squareOnePlayer.coordinates.x][squareOnePlayer.coordinates.y + 1].hasPlayer ||
+    squareOnePlayer.coordinates.x < this.squares.length - 1 &&
+    this.squares[squareOnePlayer.coordinates.x + 1][squareOnePlayer.coordinates.y].hasPlayer ||
+    squareOnePlayer.coordinates.y > 0 &&
+    this.squares[squareOnePlayer.coordinates.x][squareOnePlayer.coordinates.y - 1].hasPlayer;
 
     doARound = (squarePlayerWillPlay) => {
         this.markSquaresReachableByPlayer(squarePlayerWillPlay);
@@ -322,6 +324,7 @@ class Board {
 
     engageBattle = (attacker) => {
         alert("Figth to the death engaged!");
+        $("#board").css({display: "none"});
         this.changePlayer();
         new Battle(attacker, this.currentPlayer, this.players[0], this.players[1]);
     }

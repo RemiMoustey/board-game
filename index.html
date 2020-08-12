@@ -1,83 +1,84 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="style.css">
-    <title>Jeu de plateau</title>
-</head>
-<body>
-    <form id="formWalls" method="post" action="" class="mt-3 ml-2">
-        <div class="form-group">
-            <label for="walls">Choisissez le nombre de murs (de 8 à 14) : </label>
-            <input type="number" name="walls" id="walls" min="8" max="14" /><br />
-        </div>
-        <div class="form-group">
-            <label for="weapons">Choisissez le nombre d'armes (de 1 à 4) : </label>
-            <input type="number" name="weapons" id="weapons" min="1" max="4" />
-        </div>
-        <button type="submit" class="btn btn-primary">Générer</button>
-    </form>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="style.css">
+        <title>Board game</title>
+    </head>
+    <body>
+        <form id="formParameters" method="post" action="" class="mt-3 ml-2">
+            <div class="form-group">
+                <label for="walls">Choose the number of walls (8 to 14) : </label>
+                <input type="number" name="walls" id="walls" min="8" max="14" /><br />
+            </div>
+            <div class="form-group">
+                <label for="weapons">Choose the number of weapons (1 to 4) : </label>
+                <input type="number" name="weapons" id="weapons" min="1" max="4" />
+            </div>
+            <button type="submit" class="btn btn-primary">Generate</button>
+        </form>
 
-    <div id="board"></div>
-    <div id="players">
-        <div id="player1">
-            <table class="table mt-5">
-                <thead>
-                    <tr>
-                        <th colspan="2"><img src="img/player1.png" alt="Player 1" /></th>
-                    </tr>
-                </theah>
-                <tbody>
-                    <tr>
-                        <td>Life points</td>
-                        <td id="lifePoints-player1"></td>
-                    </tr>
-                    <tr>
-                        <td>Weapon</td>
-                        <td id="weapon-player1"></td>
-                    </tr>
-                    <tr>
-                        <td>Defense activated</td>
-                        <td id="defense-player1"></td>
-                    </tr>
-                </tbody>
-            </table>
+        <div id="board"></div>
+        <div class="ml-2" id="ending-message"></div>
+        <div id="players">
+            <div id="player1">
+                <table class="table mt-5">
+                    <thead>
+                        <tr>
+                            <th colspan="2"><img src="img/player1.png" alt="Player 1" /><span id="turn-player1"></span></th>
+                        </tr>
+                    </theah>
+                    <tbody>
+                        <tr>
+                            <td>Life points</td>
+                            <td id="lifePoints-player1"></td>
+                        </tr>
+                        <tr>
+                            <td>Weapon</td>
+                            <td id="weapon-player1"></td>
+                        </tr>
+                        <tr>
+                            <td>Defense activated</td>
+                            <td id="defense-player1"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="player2">
+                <table class="table mt-5">
+                    <thead>
+                        <tr>
+                            <th colspan="2"><img src="img/player2.png" alt="Player 2" /><span id="turn-player2"></span></th>
+                        </tr>
+                    </theah>
+                    <tbody>
+                        <tr>
+                            <td>Life points</td>
+                            <td id="lifePoints-player2"></td>
+                        </tr>
+                        <tr>
+                            <td>Weapon</td>
+                            <td id="weapon-player2"></td>
+                        </tr>
+                        <tr>
+                            <td>Defense activated</td>
+                            <td id="defense-player2"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div id="player2">
-            <table class="table mt-5">
-                <thead>
-                    <tr>
-                        <th colspan="2"><img src="img/player2.png" alt="Player 2" /></th>
-                    </tr>
-                </theah>
-                <tbody>
-                    <tr>
-                        <td>Life points</td>
-                        <td id="lifePoints-player2"></td>
-                    </tr>
-                    <tr>
-                        <td>Weapon</td>
-                        <td id="weapon-player2"></td>
-                    </tr>
-                    <tr>
-                        <td>Defense activated</td>
-                        <td id="defense-player2"></td>
-                    </tr>
-                </tbody>
-            </table>
+        <div id="buttons-battle" class="my-3 text-center">
+            <button id="attack-button">Attack</button>
+            <button id="defense-button">Defense</button>
         </div>
-    </div>
-    <div id="buttons-battle" class="my-3 text-center">
-        <button id="attack-button">Attack</button>
-        <button id="defense-button">Defense</button>
-    </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="weapon.js"></script>
-    <script src="player.js"></script>
-    <script src="square.js"></script>
-    <script src="battle.js"></script>
-    <script src="board.js"></script>
-</body>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="weapon.js"></script>
+        <script src="player.js"></script>
+        <script src="square.js"></script>
+        <script src="battle.js"></script>
+        <script src="board.js"></script>
+    </body>
 </html>

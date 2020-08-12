@@ -4,12 +4,17 @@ class Battle {
         this.playerTwo = playerTwo;
         this.attacker = firstPlayer;
         this.attacked = otherPlayer;
-        console.log(this)
         $("#buttons-battle").css({display: "block"});
         $("#players").css({display: "block"});
         this.updateBoards(this.playerOne);
-        this.updateBoards(this.playerTwo)
+        this.updateBoards(this.playerTwo);
+        this.updateTurn();
         this.doABattleRound();
+    }
+
+    updateTurn = () => {
+        $("#turn-" + this.attacker.name).text("It's your turn!");
+        $("#turn-" + this.attacked.name).text("");
     }
 
     doABattleRound = () => {
@@ -34,16 +39,19 @@ class Battle {
             return;
         }
         this.attacked.defenseActivated = false;
+        this.updatAfterTurn();
+    }
+
+    updatAfterTurn = () => {
         this.updateBoards(this.attacker);
         this.updateBoards(this.attacked);
         this.changeAttacker();
+        this.updateTurn();
     }
 
     defend = () => {
         this.attacker.defenseActivated = true;
-        this.updateBoards(this.attacker);
-        this.updateBoards(this.attacked);
-        this.changeAttacker();
+        this.updatAfterTurn();
     }
 
     updateBoards = (player) => {
@@ -60,6 +68,6 @@ class Battle {
         $("#board").html("");
         $("#buttons-battle").html("");
         $("#players").html("");
-        $("#board").text("The battle is ended : " + this.attacker.name.substring(0, 6) + " " + this.attacker.name.substring(6, 7) + " won!")
+        $("#ending-message").text("The fight is ended : " + this.attacker.name.substring(0, 6) + " " + this.attacker.name.substring(6, 7) + " won!");
     }
 }
