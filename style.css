@@ -1,10 +1,24 @@
-#board, #players {
-    max-width: 820px;
+#game {
+    max-width: 1200px;
     margin: 0 auto;
 }
 
+#board {
+    max-width: 820px;
+    margin: 0 auto;
+    order: 2;
+}
+
+#player1 {
+    order: 1;
+}
+
+#player2 {
+    order: 3;
+}
+
 #board div {
-    height: 80px;
+    height: 54px;
 }
 
 .square {
@@ -20,7 +34,7 @@
     cursor: pointer;
 }
 
-#buttons-battle, #players {
+#buttons-battle {
     display: none;
 }
 
@@ -29,7 +43,7 @@
 }
 
 @media all and (max-width: 991px) {
-    #board, #players {
+    #game {
         max-width: 520px;
     }
 
@@ -39,7 +53,7 @@
 }
 
 @media all and (max-width: 575px) {
-    #board, #players {
+    #board {
         max-width: 270px;
     }
 

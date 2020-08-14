@@ -1,11 +1,11 @@
-class Battle {
+class Fight {
     constructor(firstPlayer, otherPlayer, playerOne, playerTwo) {
         this.playerOne = playerOne;
         this.playerTwo = playerTwo;
         this.attacker = firstPlayer;
         this.attacked = otherPlayer;
         $("#buttons-battle").css({display: "block"});
-        $("#players").css({display: "block"});
+        $("#game").css({justifyContent: "space-around"});
         this.updateBoards(this.playerOne);
         this.updateBoards(this.playerTwo);
         this.updateTurn();
@@ -65,9 +65,8 @@ class Battle {
     }
 
     endBattle = () => {
-        $("#board").html("");
+        $("#game").html("");
         $("#buttons-battle").html("");
-        $("#players").html("");
         $("#ending-message").text("The fight is ended : " + this.attacker.name.substring(0, 6) + " " + this.attacker.name.substring(6, 7) + " won!");
     }
 }

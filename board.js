@@ -10,7 +10,7 @@ class Board {
         this.players = [new Player("player1"), new Player("player2")];
         this.currentPlayer = this.players[0];
         this.currentReachableSquares = null;
-        $("#formParameters").submit(this.generateInitialBoard);
+        this.generateInitialBoard();
     }
 
     createSquares = (numberLines, numberColumns) => {
@@ -29,17 +29,9 @@ class Board {
 
     getRandomSquare = () => this.squares[this.getRandomRaw()][this.getRandomRaw()];
 
-    generateInitialBoard = (e) => {
-        e.preventDefault();
-        if(!isNaN($("#walls").val()) && $("#walls").val() >= 8 && $("#walls").val() <= 14 &&
-        !isNaN($("#weapons").val()) && $("#weapons").val() >= 1 && $("#weapons").val() <= 4) {
-            let numberWalls = $("#walls").val();
-            this.insertWalls(numberWalls);
-            this.summonWeapons($("#weapons").val());
-        } else {
-            $("#formParameters").html("");
-            $("#board").text("Erreur : données envoyées incorrectes.");
-        }
+    generateInitialBoard = () => {
+        this.insertWalls(this.getRandomNumber(8, 14));
+        this.summonWeapons(4);
     }
 
     determineImage = (square) => {
@@ -304,6 +296,7 @@ class Board {
         if(square.hasWeapon) {
             let lastPlayerWeapon = player.weapon;
             player.weapon = square.weapon;
+            $("#weapon-" + player.name).text(square.weapon.name);
             lastPlayerWeapon.image = lastPlayerWeapon.image;
             square.weapon = lastPlayerWeapon;
         }
@@ -326,7 +319,7 @@ class Board {
         alert("Figth to the death engaged!");
         $("#board").css({display: "none"});
         this.changePlayer();
-        new Battle(attacker, this.currentPlayer, this.players[0], this.players[1]);
+        new Fight(attacker, this.currentPlayer, this.players[0], this.players[1]);
     }
 
     movePlayer = (e) => {
